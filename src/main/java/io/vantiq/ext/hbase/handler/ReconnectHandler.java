@@ -1,6 +1,6 @@
-package io.vantiq.ext.amqpSource.handler;
+package io.vantiq.ext.hbase.handler;
 
-import io.vantiq.ext.amqpSource.AMQPConnector;
+import io.vantiq.ext.hbase.HBaseConnector;
 import io.vantiq.ext.sdk.ExtensionServiceMessage;
 import io.vantiq.ext.sdk.ExtensionWebSocketClient;
 import io.vantiq.ext.sdk.Handler;
@@ -16,9 +16,9 @@ public class ReconnectHandler extends Handler<ExtensionServiceMessage> {
 
     static final Logger LOG = LoggerFactory.getLogger(PublishHandler.class);
 
-    private AMQPConnector extension;
+    private HBaseConnector extension;
 
-    public ReconnectHandler(AMQPConnector extension) {
+    public ReconnectHandler(HBaseConnector extension) {
         this.extension = extension;
     }
 

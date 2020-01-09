@@ -1,18 +1,17 @@
-# vantiq-amqp-connector
-amqp-connector for VANTIQ
+# vantiq-hbase-connector
+hbase-connector for VANTIQ
 
 
 ## Usage
-1. register AMQP Source with ProtoBuf 
+1. register HBase Source 
 2. create a source in VANTIQ
-3. start rabbitMQ server
-4. start the connector
+3. start the connector
 
 ## register
-Create a config file named *amqpSource.json*:
+Create a config file named *hbaseSource.json*:
 ```
 {
-   "name" : "AMQPProtoSource",
+   "name" : HBaseSource",
    "baseType" : "EXTENSION",
    "verticle" : "service:extensionSource",
    "config" : {}
@@ -21,20 +20,15 @@ Create a config file named *amqpSource.json*:
 
 And run:
 ```
-vantiq -s <profileName> load sourceimpls amqpSource.json
+vantiq -s <profileName> load sourceimpls hbaseSource.json
 ```
 
 ## Create source
-In VANTIQ, you should see a new Source type named *AMQPProtoSource*, create a new source with this type, and config:
+In VANTIQ, you should see a new Source type named *HBaseSource*, create a new source with this type, and config:
 ```
 {
-    "amqp_server_host": "localhost",
-    "amqp_server_port": "5672",
-    "amqp_user": "username",
-    "amqp_password": "thePassword",
-    "queue": "test_name",
-    "proto_name": "Face",
-    "proto_class_name": "Face$FACE_DETECT_MESSAGE"
+    "hbase_server_host": "localhost",
+    "hbase_server_port": "2181"
 }
 ```
 
@@ -48,14 +42,16 @@ At first, package the connector with:
 mvn package -Dmaven.test.skip=true 
 
 # and run
-java -jar target/amqp-connector-1.0-SNAPSHOT-jar-with-dependencies.jar
+java -jar target/hbase-connector-1.0-SNAPSHOT-jar-with-dependencies.jar
 ```
 
-When you run with jar, the protobuf file should be in home directory, if you didn't set, it is the current directory you work.
-
-For example, in command above, you are in *amqp-connector* project directory. So you should have Face.java file in here.
-
 ## Test
-To send some message to rabbitMQ to test, you run the unit test *AMQPTest.test1*, it will get protobuf data from file *Face.txt* and send to rabbitMQ.
+To send add record to hbase, you run the procedure as below:
+```
+var theData = []
+push(theData, ["family", "column1Name", "value1"])
+push(theData, ["family", "column2Name", "value2"])
+push(theData, ["family", "column3Name", "value3"])
+PUBLISH { "tableName": "theTableName", "serviceId": "s1", "deviceId": "d1", datas: theData } TO SOURCE iot_kafka USING { topic: "topic_test" }
+```
 
-Then you can see the message in connector log, and in VANTIQ.   

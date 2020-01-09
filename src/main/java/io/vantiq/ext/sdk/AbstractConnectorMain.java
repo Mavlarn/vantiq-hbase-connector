@@ -1,7 +1,6 @@
-package io.vantiq.ext.amqpSource;
+package io.vantiq.ext.sdk;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 import org.apache.commons.cli.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,14 +12,15 @@ import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 
-import static io.vantiq.ext.amqpSource.AMQPConnectorConstants.*;
+import static io.vantiq.ext.hbase.ConnectorConstants.*;
 
 
-public class AMQPConnectorMain {
+public class AbstractConnectorMain {
+
     public static final String LOCAL_CONFIG_FILE_NAME = "config.json";
-    static final Logger log = LoggerFactory.getLogger(AMQPConnectorMain.class);
+    static final Logger log = LoggerFactory.getLogger(AbstractConnectorMain.class);
 
-    public static void main(String[] argv) throws IOException {
+    protected static CommandLine parseCommand(String[] argv) {
         Options options = new Options();
 
         Option input = new Option("d", VANTIQ_HOME_DIR, true, "home directory for this source");
@@ -40,21 +40,14 @@ public class AMQPConnectorMain {
         options.addOption(sourceNameOpt);
 
         CommandLineParser parser = new DefaultParser();
-        HelpFormatter formatter = new HelpFormatter();
-        CommandLine cmd = null;
 
         try {
-            cmd = parser.parse(options, argv);
+            return parser.parse(options, argv);
         } catch (ParseException e) {
             log.error("Error {} parsing command line with arguments: {}", e.getMessage(), argv);
-            formatter.printHelp("<opc ua source server> <arguments>", options);
             System.exit(1);
+            return null;
         }
-
-
-        Map<String, String> connectInfo = constructConfig(cmd);
-        AMQPConnector amqpConnector = new AMQPConnector(connectInfo.get(VANTIQ_SOURCE_NAME), connectInfo);
-        amqpConnector.start();
     }
 
     public static Map<String, String> constructConfig(CommandLine cmd) {
@@ -79,7 +72,7 @@ public class AMQPConnectorMain {
 
         String configFileName = locDir.getAbsolutePath() + File.separator + LOCAL_CONFIG_FILE_NAME;
         InputStream cfr = null;
-        Map<String, Object> props = null;
+        Map<String, Object> props;
         try {
             File configFile = new File(configFileName);
             if (configFile.exists()) {
@@ -124,7 +117,7 @@ public class AMQPConnectorMain {
                 }
             }
         }
-        log.debug("Extension Config: {}", configMap);
+        log.debug("Connector Config: {}", configMap);
         return configMap;
     }
 }

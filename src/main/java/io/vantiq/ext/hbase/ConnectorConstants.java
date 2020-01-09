@@ -1,6 +1,6 @@
-package io.vantiq.ext.amqpSource;
+package io.vantiq.ext.hbase;
 
-public class AMQPConnectorConstants {
+public class ConnectorConstants {
 
     public static final String VANTIQ_URL = "vantiqUrl";
     public static final String VANTIQ_TOKEN = "token";

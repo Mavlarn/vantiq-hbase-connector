@@ -1,12 +1,15 @@
-package io.vantiq.ext.amqpSource.handler;
+package io.vantiq.ext.hbase.handler;
 
-import io.vantiq.ext.amqpSource.AMQPConnector;
+import io.vantiq.ext.hbase.HBaseClient;
+import io.vantiq.ext.hbase.HBaseConnector;
 import io.vantiq.ext.sdk.ExtensionServiceMessage;
 import io.vantiq.ext.sdk.ExtensionWebSocketClient;
 import io.vantiq.ext.sdk.Handler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Date;
+import java.util.List;
 import java.util.Map;
 
 
@@ -14,16 +17,15 @@ public class PublishHandler extends Handler<ExtensionServiceMessage> {
 
     static final Logger LOG = LoggerFactory.getLogger(PublishHandler.class);
 
-    private AMQPConnector connector;
+    private HBaseConnector connector;
 
-    public PublishHandler(AMQPConnector connector) {
+    public PublishHandler(HBaseConnector connector) {
         this.connector = connector;
     }
 
     @Override
     public void handleMessage(ExtensionServiceMessage message) {
-        LOG.info("Publish called with message " + message.toString());
-
+        LOG.debug("Publish called with message " + message.toString());
         String replyAddress = ExtensionServiceMessage.extractReplyAddress(message);
         ExtensionWebSocketClient client = connector.getVantiqClient();
 
@@ -42,10 +44,20 @@ public class PublishHandler extends Handler<ExtensionServiceMessage> {
 
         // Gather query results, or send a query error if an exception is caught
         try {
-            String topic = (String)request.get("topic");
-            Object message = request.get("message");
-            this.connector.getAmqpTemplate().convertAndSend(topic, message);
-            LOG.trace("Sent message: ", message);
+            HBaseClient hBaseClient = connector.gethBaseClient();
+
+            String tableName = (String)request.get("tableName");
+            String deviceId = (String)request.get("deviceId");
+            String serviceId = (String)request.get("serviceId");
+            List<String[]> datas = (List<String[]>)request.get("datas");
+            Date createdDate = new Date();
+            String pkStr = "pk";
+
+            byte[] rowKey = hBaseClient.getRowKey(deviceId, serviceId, createdDate.toString(), pkStr.getBytes());
+
+            hBaseClient.add(tableName, rowKey, datas);
+
+            LOG.debug("Added records: ");
         } catch (Exception e) {
             LOG.error("An unexpected error occurred when executing publish.", e);
             LOG.error("Request was: {}", request);

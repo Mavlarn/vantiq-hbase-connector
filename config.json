@@ -1,6 +1,6 @@
 {
     "vantiqUrl": "http://localhost:8080",
-    "token": "CJEyQR8nFMz8M0s8HGvcAGkqsjfK_16UbhzdjhEXNMo=",
-    "sourceName": "amqp_proto_source",
+    "token": "<the_token>",
+    "sourceName": "test_hbase_source",
     "homeDir": ""
 }
